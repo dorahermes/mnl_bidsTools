@@ -1,7 +1,7 @@
 % 
 %   Generate BIDS iEEG amplifier metadata files based on a MEF3 dataset
 %
-%   genBIDSFromMEF3(inputMef, outputDir)
+%   createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
 %
 %   inputMef          = MEF3 input. This argument accepts a path to the MEF3 session folder or a MEF3 struct (loaded
 %                       using the 'matmef' function 'read_mef_session_metadata'); If left empty, a dialog box will prompt for a directory
@@ -14,7 +14,7 @@
 %
 %   Example:
 %
-%       genBIDSFromMEF3('./mefSessionDataFolder/', './bidsOutputFolder')
+%       createBIDS_ampFiles_fromMEF3('./mefSessionDataFolder/', './bidsOutputFolder')
 %
 %
 %   Copyright 2020, Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
@@ -25,7 +25,7 @@
 %   warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 %   You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 %
-function genBIDSFromMEF3(inputMef, outputDir)
+function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     if ~exist('inputMef', 'var'),           inputMef = []; end
     if ~exist('outputDir', 'var'),          outputDir = []; end
     
