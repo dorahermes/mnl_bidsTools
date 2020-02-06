@@ -9,7 +9,6 @@
 %                       The following BIDS files will be generated and stored in the folder:
 %                           <datetime>_channels.tsv
 %                           <datetime>_ieeg.json
-%                           <datetime>_events.tsv
 %
 %
 %   Example:
