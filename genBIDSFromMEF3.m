@@ -12,6 +12,11 @@
 %                           <datetime>_events.tsv
 %
 %
+%   Example:
+%
+%       genBIDSFromMEF3('./mefSessionDataFolder/', './bidsOutputFolder')
+%
+%
 %   Copyright 2020, Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
 
 %   This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
@@ -28,6 +33,7 @@ function genBIDSFromMEF3(inputMef, outputDir)
     % check (and/or prompt) the MEF3 input
     %
     if isempty(inputMef)
+        disp('- Select the input MEF3 session directory in the folder selection dialog -');
         inputMef = uigetdir(pwd, 'Select the input MEF3 session directory');
         if inputMef == 0,   return;     end
     end
@@ -52,6 +58,7 @@ function genBIDSFromMEF3(inputMef, outputDir)
     % check the output folder
     %
     if isempty(outputDir)
+        disp('- Select an output directory in the folder selection dialog -');
         outputDir = uigetdir(pwd, 'Select an output directory');
         if outputDir == 0,   return;     end
     end
