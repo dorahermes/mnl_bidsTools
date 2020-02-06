@@ -3,13 +3,14 @@
 %
 %   genBIDSFromMEF3(inputMef, outputDir)
 %
-%   inputMef        = the MEF3 input. This argument accepts a path to the MEF3 session folder or a MEF3 struct (preloaded using
-%                     the 'matmef' function 'read_mef_session_metadata'); If left empty, a dialog box will prompt for a directory
-%   outputDir       = the folder to which the output should be written; If left empty, a dialog box will prompt for a directory.
-%                     The following files will be created in the folder:
-%                         <datetime>_channels.tsv
-%                         <datetime>_ieeg.tsv
-%                         <datetime>_events.tsv
+%   inputMef          = MEF3 input. This argument accepts a path to the MEF3 session folder or a MEF3 struct (loaded
+%                       using the 'matmef' function 'read_mef_session_metadata'); If left empty, a dialog box will prompt for a directory
+%   outputDir         = The folder to which the output should be written; If left empty, a dialog box will prompt for a directory.
+%                       The following BIDS files will be generated and stored in the folder:
+%                           <datetime>_channels.tsv
+%                           <datetime>_ieeg.json
+%                           <datetime>_events.tsv
+%
 %
 %   Copyright 2020, Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
 
@@ -64,9 +65,94 @@ function genBIDSFromMEF3(inputMef, outputDir)
         return;
     end
 
+    
     %
+    % build a new channel struct with the BIDS output
     %
+    
+    channels = [];
+    
+    % loop through the channels
+    counter = 1;
+    for iChannel = 1:length(inputMef.time_series_channels)
+        
+        % include only channels of the TIME_SERIES_CHANNEL_TYPE
+        if inputMef.time_series_channels(iChannel).channel_type == 1
+            
+            % pass to variable for readability below
+            section2 = inputMef.time_series_channels(iChannel).metadata(1).section_2;
+            
+            
+            % name and type
+            channels(counter).name                  = inputMef.time_series_channels(iChannel).name;
+            channels(counter).type                  = 'ieeg';                                           % can be any per channel (e.g. ECOG, SEEG, ECG, EMG, EOG), default to 'ieeg'
+            
+            % units
+            if strcmpi(section2.units_description, 'microvolts')
+                channels(counter).units             = 'uV';
+            else
+                channels(counter).units             = section2.units_description;
+            end
+            
+            % cutoffs
+            if ~isempty(section2.low_frequency_filter_setting) &&  section2.low_frequency_filter_setting > 0
+                channels(counter).low_cutoff             = section2.low_frequency_filter_setting;
+            else
+                channels(counter).low_cutoff             = 'n/a';                                       % TODO: n/a instead of 0? (https://github.com/bids-standard/bids-starter-kit/blob/master/matlabCode/createBIDS_ieeg_channels_tsv.m), leave out, Ask dora
+            end
+            if ~isempty(section2.high_frequency_filter_setting) &&  section2.high_frequency_filter_setting > 0
+                channels(counter).high_cutoff             = section2.high_frequency_filter_setting;
+            else
+                channels(counter).high_cutoff             = 'n/a';                                       % TODO: n/a instead of 0? (https://github.com/bids-standard/bids-starter-kit/blob/master/matlabCode/createBIDS_ieeg_channels_tsv.m), leave out, Ask dora
+            end
+            
+            % reference
+            if ~isempty(section2.reference_description)
+                channels(counter).reference         = section2.reference_description
+            else
+                channels(counter).reference         = 'intracranal';                                    % TODO: from example, n/a?, ask dora..
+            end
+            
+            % group and sampling frequency
+            channels(counter).group                 = 'n/a';                                            % TODO: from example, leave out?, ask dora
+            channels(counter).sampling_frequency    = section2.sampling_frequency;
+            
+            % description
+            if ~isempty(section2.channel_description) && ~strcmpi(section2.channel_description, 'not_entered')
+                channels(counter).description       = section2.channel_description;
+            else
+                
+                % TODO: from example, leave out?, ask dora
+                channels(counter).description       = 'n/a';
+                
+            end
+            
+            % notch
+            if ~isempty(section2.notch_filter_frequency_setting) && section2.notch_filter_frequency_setting > 0
+                channels(counter).notch                 = section2.notch_filter_frequency_setting;
+            else 
+                channels(counter).notch                 = 'n/a';                                    % TODO: n/a instead of 0? (https://github.com/bids-standard/bids-starter-kit/blob/master/matlabCode/createBIDS_ieeg_channels_tsv.m), leave out, Ask dora
+            end
+            
+            % status
+            channels(counter).status                = 'n/a';                                        % TODO: from example, leave out?, ask dora
+            channels(counter).status_description    = 'n/a';                                        % TODO: from example, leave out?, ask dora
+            
+            
+            % next output entry
+            counter = counter + 1;
+            
+        end
+        
+    end
+    
+    
     %
-    inputMef
+    % write the channel struct to a tab-seperated file (.tsv)
+    %
+    
+    writetable( struct2table(channels), ...
+                [outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_channels.tsv'], ...
+                'FileType', 'text', 'Delimiter', '\t');
     
 end
