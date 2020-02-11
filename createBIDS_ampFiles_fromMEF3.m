@@ -234,9 +234,11 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     %
     % write the channel struct to a tab-seperated file (_channels.tsv)
     %
-    writetable( struct2table(channels), ...
-                [outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_channels.tsv'], ...
-                'FileType', 'text', 'Delimiter', '\t');
+    if ~isempty(channels)
+        writetable( struct2table(channels), ...
+                    [outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_channels.tsv'], ...
+                    'FileType', 'text', 'Delimiter', '\t');
+    end
     
     %
     % write the ieeg struct to a JSON file (_ieeg.json)
@@ -283,9 +285,7 @@ function writeElement(fid, data, tabs)
     currentElementValue = data.(currentField);
     writeSingleElement(fid, currentField, currentElementValue,tabs);
     
-    % remove tab
-    if length(tabs) > 0,    tabs = tabs(1:end-1);   end
-    
+    if ~isempty(tabs),    tabs = tabs(1:end-1);   end
     fprintf(fid,'\n%s}',tabs);
 end
 
