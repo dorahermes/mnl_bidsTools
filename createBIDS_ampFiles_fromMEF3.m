@@ -72,6 +72,40 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     end
 
     
+    % 
+    % order the channels using the channel metadata (if possible)
+    % using channel->metadata->section_2->acquisition_channel_number
+    % 
+
+    % list the acquisition channel numbers
+    acqChNum = [];
+    for i = 1:inputMef.number_of_time_series_channels
+        acqChNum(i) = inputMef.time_series_channels(i).metadata.section_2.acquisition_channel_number;
+    end
+
+    % sort the channels
+    [ordAcqChNum, prevIndex] = sort(acqChNum);
+
+    % check if it starts at one
+    if min(acqChNum) ~= 1
+        warning('on'); warning('backtrace', 'off');
+        warning('The acquisition channel count does not start at 1, check the (metadata) output to see if ordered correctly');
+    end
+
+    % check if not consecutive
+    if ~isempty(setdiff(min(acqChNum):max(acqChNum), acqChNum))
+        warning('on'); warning('backtrace', 'off');
+        warning('The acquisition channel count is not consecutive, check the (metadata) output to see if ordered correctly');
+    end
+
+    % re-order the channels in the metadata
+    for i = 1:length(ordAcqChNum)
+        tmpStruct(i) = inputMef.time_series_channels(prevIndex(i));
+    end
+    inputMef.time_series_channels = tmpStruct;
+    
+    
+    
     %
     % build a channel struct with the BIDS output
     %
@@ -89,11 +123,9 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
             section2 = inputMef.time_series_channels(iChannel).metadata(1).section_2;
             
             
-            % name and type
+            % name, type and units (must be present)
             channels(counter).name                  = inputMef.time_series_channels(iChannel).name;
             channels(counter).type                  = 'ieeg';                                           % can be any per channel (e.g. ECOG, SEEG, ECG, EMG, EOG), default to 'ieeg'
-            
-            % units
             if strcmpi(section2.units_description, 'microvolts')
                 channels(counter).units             = 'uV';
             else
