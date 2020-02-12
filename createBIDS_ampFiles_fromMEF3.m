@@ -3,8 +3,8 @@
 %
 %   createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
 %
-%   inputMef          = MEF3 input. This argument accepts a path to the MEF3 session folder or a MEF3 struct (loaded
-%                       using the 'matmef' function 'read_mef_session_metadata'); If left empty, a dialog box will prompt for a directory
+%   inputMef          = MEF3 input, either as a path to the MEF3 session folder or a MEF3 struct (see 'matmef' function 'read_mef_session_metadata');
+%                       If left empty, a dialog box will prompt for a directory
 %   outputDir         = The folder to which the output should be written; If left empty, a dialog box will prompt for a directory.
 %                       The following BIDS files will be generated and stored in the folder:
 %                           <datetime>_channels.tsv
@@ -13,7 +13,7 @@
 %
 %   Example:
 %
-%       createBIDS_ampFiles_fromMEF3('./mefSessionDataFolder/', './bidsOutputFolder')
+%       createBIDS_ampFiles_fromMEF3('./mefSessionFolder/', './bidsOutputFolder')
 %
 %
 %   Copyright 2020, Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
