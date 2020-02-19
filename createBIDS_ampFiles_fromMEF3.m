@@ -16,7 +16,7 @@
 %       createBIDS_ampFiles_fromMEF3('./mefSessionFolder/', './bidsOutputFolder')
 %
 %
-%   Copyright 2020, Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
+%   Copyright 2020, Dora Hermes & Max van den Boom (Multimodal Neuroimaging Lab, Mayo Clinic, Rochester MN)
 
 %   This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License
 %   as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -79,14 +79,14 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
 
     % list the acquisition channel numbers
     acqChNum = [];
-    for i = 1:inputMef.number_of_time_series_channels
-        acqChNum(i) = inputMef.time_series_channels(i).metadata.section_2.acquisition_channel_number;
+    for ii = 1:inputMef.number_of_time_series_channels
+        acqChNum(ii) = inputMef.time_series_channels(ii).metadata.section_2.acquisition_channel_number;
     end
 
     % sort the channels
     [ordAcqChNum, prevIndex] = sort(acqChNum);
 
-    % check if it starts at one
+    % check if channel numbers start at one
     if min(acqChNum) ~= 1
         warning('on'); warning('backtrace', 'off');
         warning('The acquisition channel count does not start at 1, check the (metadata) output to see if ordered correctly');
@@ -99,15 +99,15 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     end
 
     % re-order the channels in the metadata
-    for i = 1:length(ordAcqChNum)
-        tmpStruct(i) = inputMef.time_series_channels(prevIndex(i));
+    for ii = 1:length(ordAcqChNum)
+        tmpStruct(ii) = inputMef.time_series_channels(prevIndex(ii));
     end
     inputMef.time_series_channels = tmpStruct;
     
     
     
     %
-    % build a channel struct with the BIDS output
+    % build a channels structure for the BIDS _channel.tsv table
     %
     
     channels = [];
@@ -121,13 +121,12 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
             
             % pass to variable for readability below
             section2 = inputMef.time_series_channels(iChannel).metadata(1).section_2;
-            
-            
+                        
             % name, type and units (must be present)
             channels(counter).name                  = inputMef.time_series_channels(iChannel).name;
-            channels(counter).type                  = 'ieeg';                                           % can be any per channel (e.g. ECOG, SEEG, ECG, EMG, EOG), default to 'ieeg'
+            channels(counter).type                  = 'n/a';                                           % can be any per channel (e.g. ECOG, SEEG, ECG, EMG, EOG), default to 'ieeg'
             if strcmpi(section2.units_description, 'microvolts')
-                channels(counter).units             = 'uV';
+                channels(counter).units             = [native2unicode(181,'latin1') 'V'];
             else
                 channels(counter).units             = section2.units_description;
             end
@@ -146,24 +145,14 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
             
             % reference
             if ~isempty(section2.reference_description)
-                channels(counter).reference         = section2.reference_description
+                channels(counter).reference         = section2.reference_description;
             else
-                channels(counter).reference         = 'intracranal';                                    % TODO: from example, n/a?, ask dora..
+                channels(counter).reference         = 'intracranial';                                    % TODO: from example, n/a?, ask dora..
             end
             
             % group and sampling frequency
             channels(counter).group                 = 'n/a';                                            % TODO: from example, leave out?, ask dora
             channels(counter).sampling_frequency    = section2.sampling_frequency;
-            
-            % description
-            if ~isempty(section2.channel_description) && ~strcmpi(section2.channel_description, 'not_entered')
-                channels(counter).description       = section2.channel_description;
-            else
-                
-                % TODO: from example, leave out?, ask dora
-                channels(counter).description       = 'n/a';
-                
-            end
             
             % notch
             if ~isempty(section2.notch_filter_frequency_setting) && section2.notch_filter_frequency_setting > 0
@@ -186,7 +175,7 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     
     
     %
-    % build a ieeg struct with the BIDS output
+    % build a ieeg struct for the BIDS _ieeg.json output
     %
     
     ieeg = [];
@@ -217,7 +206,7 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     ieeg.EMGChannelCount = 0;
     ieeg.MiscChannelCount = 0;
     ieeg.TriggerChannelCount = 0;
-    ieeg.RecordingDuration = '';                        % TODO: ask dora, which units?
+    ieeg.RecordingDuration = ((double(inputMef.latest_end_time)-double(inputMef.earliest_start_time))./1000000);                   
     ieeg.RecordingType = 'continuous';
     ieeg.EpochLength = 0;
     ieeg.SubjectArtefactDescription = '';
