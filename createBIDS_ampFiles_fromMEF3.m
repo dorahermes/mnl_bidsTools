@@ -126,7 +126,7 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
             channels(counter).name                  = inputMef.time_series_channels(iChannel).name;
             channels(counter).type                  = 'n/a';                                           % can be any per channel (e.g. ECOG, SEEG, ECG, EMG, EOG), default to 'ieeg'
             if strcmpi(section2.units_description, 'microvolts')
-                channels(counter).units             = [native2unicode(181,'latin1') 'V'];
+                channels(counter).units             = [native2unicode([194, 181],'UTF-8') 'V'];
             else
                 channels(counter).units             = section2.units_description;
             end
@@ -226,13 +226,13 @@ function createBIDS_ampFiles_fromMEF3(inputMef, outputDir)
     if ~isempty(channels)
         writetable( struct2table(channels), ...
                     [outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_channels.tsv'], ...
-                    'FileType', 'text', 'Delimiter', '\t');
+                    'FileType', 'text', 'Delimiter', '\t', 'Encoding', 'UTF-8');
     end
     
     %
     % write the ieeg struct to a JSON file (_ieeg.json)
     %
-    fileID = fopen([outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_ieeg.json'], 'w');
+    fileID = fopen([outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_ieeg.json'], 'w', 'native', 'UTF-8');
     writeElement(fileID, ieeg, '');
     fprintf(fileID,'\n');
     fclose(fileID);
