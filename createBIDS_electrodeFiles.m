@@ -134,13 +134,14 @@ function createBIDS_electrodeFiles(inputMat, outputDir)
     if ~isempty(electrodes)
         writetable( struct2table(electrodes), ...
                     [outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_electrodes.tsv'], ...
-                    'FileType', 'text', 'Delimiter', '\t');
+                    'FileType', 'text', 'Delimiter', '\t', ...
+					'Encoding', 'UTF-8');
     end
     
     %
     % write the coordsystem struct to a JSON file (_coordsystem.json)
     %
-    fileID = fopen([outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_coordsystem.json'], 'w');
+    fileID = fopen([outputDir, filesep, datestr(now, 'yyyymmdd_HHMMSS_FFF'), '_coordsystem.json'], 'w', 'native', 'UTF-8');
     writeElement(fileID, coordsystem, '');
     fprintf(fileID,'\n');
     fclose(fileID);
