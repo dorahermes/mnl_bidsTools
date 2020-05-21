@@ -108,7 +108,8 @@ function createBIDS_electrodeFiles(inputMat, outputDir)
         electrodes(counter).x           = inputElectrodes(iElec, 1);
         electrodes(counter).y           = inputElectrodes(iElec, 2);
         electrodes(counter).z           = inputElectrodes(iElec, 3);
-
+		electrodes(counter).size        = 'n/a';
+		
         % next output entry
         counter = counter + 1;
             
